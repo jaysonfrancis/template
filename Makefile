@@ -1,8 +1,30 @@
-# .PHONY: install
+.ONESHELL:
+
+# standardize on bash
+SHELL := /bin/bash
+
+UV_INSTALL_CMD := curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# --- Define patterns to clean here ---
+CLEAN_DIRS := __pycache__ *.egg-info dist build .pytest_cache .ipynb_checkpoints .ruff_cache
+CLEAN_FILES := .DS_Store
+
+.PHONY: install
 install: ## Install the virtual environment and install the pre-commit hooks
 	@echo "🚀 Creating virtual environment using uv"
 	@uv sync
 	@uv run pre-commit install
+
+.PHONY: install-uv
+install-uv: ## Install uv if it's not already installed
+	@echo "🔍 Checking if uv is installed..."
+	@if ! command -v uv >/dev/null 2>&1; then \
+		echo "🚀 uv not found. Installing uv..."; \
+		$(UV_INSTALL_CMD) || { echo "❌ uv installation failed."; exit 1; }; \
+		echo "✅ uv installation completed."; \
+	else \
+		echo "✅ uv is already installed."; \
+	fi
 
 .PHONY: check
 check: ## Run code quality tools.
@@ -46,9 +68,32 @@ docs-test: ## Test if documentation can be built without warnings or errors
 docs: ## Build and serve the documentation
 	@uv run mkdocs serve
 
+.PHONY: clean
+clean: ## Remove standard metadata and build artifacts
+	@echo "🚀 Cleaning directories..."
+	for dir in $(CLEAN_DIRS); do \
+		find . -type d -name "$$dir" -exec rm -rf {} +; \
+	done
+	@echo "🚀 Cleaning files..."
+	for file in $(CLEAN_FILES); do \
+		find . -type f -name "$$file" -exec rm -rf {} +; \
+	done
+	@echo "✅ Clean completed."
+
+.PHONY: dry-clean
+dry-clean: ## Show what would be cleaned without actually removing files
+	@echo "🔍 Dry run: Listing directories to be cleaned..."
+	for dir in $(CLEAN_DIRS); do \
+		find . -type d -name "$$dir"; \
+	done
+	@echo "🔍 Dry run: Listing files to be cleaned..."
+	for file in $(CLEAN_FILES); do \
+		find . -type f -name "$$file"; \
+	done
+
 .PHONY: help
-help:
-	@uv run python -c "import re; \
-	[[print(f'\033[36m{m[0]:<20}\033[0m {m[1]}') for m in re.findall(r'^([a-zA-Z_-]+):.*?## (.*)$$', open(makefile).read(), re.M)] for makefile in ('$(MAKEFILE_LIST)').strip().split()]"
+help: ## Show this help message
+	@echo "Available targets:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 .DEFAULT_GOAL := help
