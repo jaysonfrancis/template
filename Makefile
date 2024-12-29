@@ -1,9 +1,36 @@
 .ONESHELL:
 
 # standardize on bash
-SHELL := /bin/bash
+SHELL:=/bin/bash
+VENV=.venv
+VENV_BIN=$(VENV)/bin
 
-UV_INSTALL_CMD := curl -LsSf https://astral.sh/uv/install.sh | sh
+# Detect CPU architecture.
+ifeq ($(OS),Windows_NT)
+    ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+		ARCH := amd64
+	else ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+		ARCH := x86
+	else ifeq ($(PROCESSOR_ARCHITECTURE),ARM64)
+		ARCH := arm64
+	else
+		ARCH := unknown
+    endif
+else
+    UNAME_P := $(shell uname -p)
+    ifeq ($(UNAME_P),x86_64)
+		ARCH := amd64
+	else ifneq ($(filter %86,$(UNAME_P)),)
+		ARCH := x86
+	else ifneq ($(filter arm%,$(UNAME_P)),)
+		ARCH := arm64
+	else
+		ARCH := unknown
+    endif
+endif
+
+# NOTE: maybe we default to pip installl uv in a python3 -m venv?
+UV_INSTALL_CMD:=curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # --- Define patterns to clean here ---
 CLEAN_DIRS := __pycache__ *.egg-info dist build .pytest_cache .ipynb_checkpoints .ruff_cache
@@ -48,14 +75,6 @@ clean-build: ## Clean build artifacts
 	@echo "🚀 Removing build artifacts"
 	@uv run python -c "import shutil; import os; shutil.rmtree('dist') if os.path.exists('dist') else None"
 
-.PHONY: publish
-publish: ## Publish a release to PyPI.
-	@echo "🚀 Publishing."
-	@uvx twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-
-.PHONY: build-and-publish
-build-and-publish: build publish ## Build and publish.
-
 .PHONY: docs-test
 docs-test: ## Test if documentation can be built without warnings or errors
 	@uv run mkdocs build -s
@@ -75,17 +94,6 @@ clean: ## Remove standard metadata and build artifacts
 		find . -type f -name "$$file" -exec rm -rf {} +; \
 	done
 	@echo "✅ Clean completed."
-
-.PHONY: dry-clean
-dry-clean: ## Show what would be cleaned without actually removing files
-	@echo "🔍 Dry run: Listing directories to be cleaned..."
-	for dir in $(CLEAN_DIRS); do \
-		find . -type d -name "$$dir"; \
-	done
-	@echo "🔍 Dry run: Listing files to be cleaned..."
-	for file in $(CLEAN_FILES); do \
-		find . -type f -name "$$file"; \
-	done
 
 .PHONY: help
 help: ## Show this help message

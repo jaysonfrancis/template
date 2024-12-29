@@ -1,3 +1,14 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mylib", "mylib.*"]
+
+[project.scripts]
+mylibcli = "mylib.cli.cli:app"
+
 [project]
 name = ""
 version = "2025.0.0a1"
@@ -40,15 +51,3 @@ explicit = true
 # [tool.uv.workspace]
 # members = ["libs/*"]
 # exclude = ["libs/some"]
-
-# ---- Project build information ---- #
-[build-system]
-requires = ["setuptools >= 61.0"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["mylib", "mylib.*"]
-
-[project.scripts]
-mylibcli = "mylib.cli.cli:app"

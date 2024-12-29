@@ -43,6 +43,6 @@ repos:
       files: \.py$
       args:
       - --license-filepath
-      - docs/license_header.txt
+      - docs/assets/license_header.txt
 
 
