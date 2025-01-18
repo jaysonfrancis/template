@@ -14,6 +14,10 @@ def main(configpath: str) -> None:
     else:
         print(f"`configpath` must be valid. Provided: `{configpath}` does not exist.")
 
+def toml_reader(path: str):
+    # TODO:
+    pass
+
 def yaml_reader(path: str) -> None:
     try:
         with open(path, 'r') as f:
