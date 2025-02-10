@@ -3,14 +3,14 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["python"]
 include = ["mylib", "mylib.*"]
 
 [project.scripts]
 mylibcli = "mylib.cli.cli:app"
 
 [project]
-name = ""
+name = "mylib"
 version = "2025.0.0a1"
 description = ""
 readme = "README.md"
@@ -27,12 +27,12 @@ dev = ["pytest", "pre-commit", "ruff", "ipykernel"]
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu", marker = "platform_system == 'Windows'" }, # and mac
-  { index = "pytorch-cu124", marker = "platform_system == 'Linux'" },
+    { index = "pytorch-cpu", marker = "platform_system == 'Windows'" }, # and mac
+    { index = "pytorch-cu124", marker = "platform_system == 'Linux'" },
 ]
 torchvision = [
-  { index = "pytorch-cpu", marker = "platform_system == 'Windows'" }, # and mac
-  { index = "pytorch-cu124", marker = "platform_system == 'Linux'" },
+    { index = "pytorch-cpu", marker = "platform_system == 'Windows'" }, # and mac
+    { index = "pytorch-cu124", marker = "platform_system == 'Linux'" },
 ]
 
 [[tool.uv.index]]
